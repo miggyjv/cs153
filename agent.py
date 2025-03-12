@@ -4,6 +4,18 @@ import discord
 from dotenv import load_dotenv
 import json
 import time
+import re
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.options import Options
+import logging
+
+# Use the existing logger from bot.py instead of creating new ones
+logger = logging.getLogger('discord')
 
 MISTRAL_MODEL = "mistral-large-latest"
 load_dotenv()
@@ -18,6 +30,12 @@ FACT_CHECK_SYSTEM_PROMPT = """You are an expert fact-checker. When presented wit
 5. Provide brief reasoning for your rating in 2-3 sentences
 6. Include relevant sources
 
+IMPORTANT RULES ABOUT SOURCES:
+- DO NOT include any URLs or links in your sources
+- Only cite Snopes if a relevant fact-check was found and provided to you
+- For other sources, simply list the name of the source (e.g., "Official records", "News reports", "Expert testimony")
+- If no specific sources are available, state "No specific sources available"
+
 FORMAT YOUR RESPONSE EXACTLY AS FOLLOWS:
 - Rating: [Your rating] 
 - Core factual assertions: [List numbered assertions]
@@ -30,18 +48,40 @@ Be concise and focused. Do not repeat the rating multiple times or create redund
 
 class FactCheckAgent:
     def __init__(self):
+        """Initialize the FactCheckAgent with both Mistral and Chrome WebDriver."""
         MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
         self.client = Mistral(api_key=MISTRAL_API_KEY)
+        
+        # Set up Chrome WebDriver
+        chrome_options = Options()
+        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.headless = True
+        
+        service = Service(ChromeDriverManager().install())
+        self.driver = webdriver.Chrome(options=chrome_options)
         
     async def fact_check(self, claim):
         """Analyze a claim and determine its factual accuracy."""
         
-        # First, search for relevant information if we need to
-        search_results = self.search_relevant_info(claim)
+        # First, get a concise summary for searching
+        summary = await self.summarize_claim(claim)
+        cleaned_summary = self.clean_for_search(summary)
+        
+        # Search Snopes using the cleaned summary
+        snopes_results = self.search_relevant_info(cleaned_summary)
         
         messages = [
             {"role": "system", "content": FACT_CHECK_SYSTEM_PROMPT},
-            {"role": "user", "content": f"Please fact check this claim: '{claim}'\n\nHere is some relevant information that might help: {search_results}"}
+            {"role": "user", "content": f"""Please fact check this claim: '{claim}'
+
+Here is what Snopes says about this or similar claims:
+{snopes_results}
+
+Please consider this information in your fact-check analysis."""}
         ]
         
         response = await self.client.chat.complete_async(
@@ -55,27 +95,46 @@ class FactCheckAgent:
         # Create an embed for Discord
         embed = self.create_fact_check_embed(raw_result, claim)
         
+        # Add Snopes reference if found
+        if "No relevant Snopes fact-checks found" not in snopes_results:
+            embed.add_field(
+                name="Snopes Reference",
+                value="✓ A related fact-check was found on Snopes and incorporated into this analysis.",
+                inline=False
+            )
+        
         return embed
     
     def search_relevant_info(self, claim):
-        """Optional: Search for information related to the claim."""
-        # This is a placeholder for a real search implementation
-        # You could use Google Search API, DuckDuckGo, or a similar service
-        
-        # For now, returning an empty string
-        return "No additional information retrieved. Using model's built-in knowledge."
-    
-    async def run_discord(self, message: discord.Message):
-        """Process a Discord message for fact checking."""
-        # Extract the claim from the message
-        # This assumes the bot is triggered by replying to a message to check
-        if message.reference and message.reference.resolved:
-            claim = message.reference.resolved.content
-            result = await self.fact_check(claim)
-            return result
-        else:
-            return "Please reply to a message containing a claim to fact check."
-
+        """Search Snopes for information related to the claim."""
+        try:
+            # Use the Snopes search URL
+            base_url = "https://www.snopes.com/search/"
+            final_url = base_url + claim
+            self.driver.get(final_url)
+            
+            # Look for fact-check links
+            xpath_expression = "//a[starts-with(@href, 'https://www.snopes.com/fact-check/')]"
+            wait = WebDriverWait(self.driver, 10)
+            element = wait.until(EC.presence_of_element_located((By.XPATH, xpath_expression)))
+            
+            # Click the first fact-check result
+            element.click()
+            
+            # Get the rating container
+            container_xpath = '//*[@id="fact_check_rating_container"]'
+            wait = WebDriverWait(self.driver, 10)
+            container = wait.until(EC.presence_of_element_located((By.XPATH, container_xpath)))
+            
+            # Get the rating and explanation
+            snopes_result = container.text
+            
+            return f"Snopes fact check result: {snopes_result}"
+            
+        except Exception as e:
+            logger.warning(f"Error searching Snopes: {e}")
+            return "No relevant Snopes fact-checks found. Using model's built-in knowledge."
+            
     def create_fact_check_embed(self, raw_result, claim):
         """Create a Discord embed for the fact check result."""
         import discord
@@ -163,6 +222,55 @@ class FactCheckAgent:
             embed.set_footer(text="Sources included - click the links above for more information")
         
         return embed
+
+    async def summarize_claim(self, claim):
+        """Summarize a lengthy claim into 1-2 concise sentences for Snopes searching."""
+        
+        messages = [
+            {"role": "system", "content": """You are a claim summarizer for fact-checking. 
+Your task is to:
+1. Extract the core assertion(s) from lengthy claims
+2. Rewrite them in 3-5 words which include the person's full name and the time period
+3. Focus on the key verifiable elements
+4. Use language similar to how fact-checking sites phrase claims
+5. Remove unnecessary details while preserving the main point
+6. For pop culture claims, keep relevant names, dates, and specific details
+
+Example input: "During the 1996 NBA Finals between the Chicago Bulls and Seattle SuperSonics, Michael Jordan was actually benched for Game 4 due to a secret suspension following a gambling scandal that the NBA covered up..."
+
+Example output: "Michael Jordan gambling scandal"
+
+Respond ONLY with the summarized claim, nothing else."""},
+            {"role": "user", "content": f"Please summarize this claim: {claim}"}
+        ]
+        
+        try:
+            response = await self.client.chat.complete_async(
+                model=MISTRAL_MODEL,
+                messages=messages,
+            )
+            
+            summary = response.choices[0].message.content.strip()
+            return summary
+            
+        except Exception as e:
+            logger.error(f"Error summarizing claim: {e}")
+            return claim  # Return original claim if summarization fails
+
+    def clean_for_search(self, text):
+        """Clean text for search queries by removing special characters and extra spaces."""
+        # Remove special characters but keep apostrophes for names
+        cleaned = re.sub(r'[^a-zA-Z0-9\s\']', ' ', text)
+        # Remove extra whitespace
+        cleaned = ' '.join(cleaned.split())
+        return cleaned
+
+    def __del__(self):
+        """Cleanup method to close the browser when the agent is destroyed."""
+        try:
+            self.driver.quit()
+        except:
+            pass
 
 def truncate_text(text, max_length):
     """Truncate text to max_length characters."""
