@@ -14,8 +14,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 import logging
 
-# Use the existing logger from bot.py instead of creating new ones
-logger = logging.getLogger('discord')
+# No longer get discord's logger
+# logger = logging.getLogger('discord')
 
 MISTRAL_MODEL = "mistral-large-latest"
 load_dotenv()
@@ -47,8 +47,11 @@ FORMAT YOUR RESPONSE EXACTLY AS FOLLOWS:
 Be concise and focused. Do not repeat the rating multiple times or create redundant sections."""
 
 class FactCheckAgent:
-    def __init__(self):
+    def __init__(self, app_logger=None):
         """Initialize the FactCheckAgent with both Mistral and Chrome WebDriver."""
+        # Use provided logger or create a default one
+        self.logger = app_logger or logging.getLogger('fact_check_agent')
+        
         MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
         self.client = Mistral(api_key=MISTRAL_API_KEY)
         
@@ -132,7 +135,7 @@ Please consider this information in your fact-check analysis."""}
             return f"Snopes fact check result: {snopes_result}"
             
         except Exception as e:
-            logger.warning(f"Error searching Snopes: {e}")
+            self.logger.warning(f"Error searching Snopes: {e}")
             return "No relevant Snopes fact-checks found. Using model's built-in knowledge."
             
     def create_fact_check_embed(self, raw_result, claim):
@@ -254,7 +257,7 @@ Respond ONLY with the summarized claim, nothing else."""},
             return summary
             
         except Exception as e:
-            logger.error(f"Error summarizing claim: {e}")
+            self.logger.error(f"Error summarizing claim: {e}")
             return claim  # Return original claim if summarization fails
 
     def clean_for_search(self, text):
