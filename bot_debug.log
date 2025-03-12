@@ -1,0 +1,203 @@
+2025-03-12 03:25:01,872 [INFO] Starting bot...
+2025-03-12 03:25:04,691 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 03:25:04,691 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 03:26:39,693 [INFO] Starting bot...
+2025-03-12 03:26:42,390 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 03:26:42,390 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 03:26:48,053 [INFO] Starting command: factcheck from beastlybagel with hash 5bf28d975e7fbe284efe8af30b106042
+2025-03-12 03:26:48,053 [INFO] Starting factcheck for request 1349327763068289086-1349324204100685907 (hash: 5bf28d975e7fbe284efe8af30b106042)
+2025-03-12 03:26:48,439 [INFO] Processing fact check for request 1349327763068289086-1349324204100685907: the fire hydrants in los angeles ran out of water that's how poor the planning is
+2025-03-12 03:26:48,439 [INFO] [Request: 1349327763068289086-1349324204100685907] Summarizing claim
+2025-03-12 03:26:49,010 [INFO] [Request: 1349327763068289086-1349324204100685907] Starting Snopes search for: LA hydrants waterless
+2025-03-12 03:27:28,702 [WARNING] Error searching Snopes: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2025-03-12 03:27:28,704 [INFO] [Request: 1349327763068289086-1349324204100685907] Completed Snopes search successfully
+2025-03-12 03:27:28,704 [INFO] [Request: 1349327763068289086-1349324204100685907] Starting Mistral fact-check API call
+2025-03-12 03:27:28,775 [INFO] Completed command: factcheck from beastlybagel with hash 5bf28d975e7fbe284efe8af30b106042
+2025-03-12 03:27:31,026 [INFO] Starting bot...
+2025-03-12 03:27:33,918 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 03:27:33,918 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 03:27:47,072 [INFO] Starting command: factcheck from beastlybagel with hash 31465a7f8379e4f97f0bd06fd54e38c3
+2025-03-12 03:27:47,072 [INFO] Starting factcheck for request 1349328010595270747-1349327985844424705 (hash: 31465a7f8379e4f97f0bd06fd54e38c3)
+2025-03-12 03:27:47,461 [INFO] Processing fact check for request 1349328010595270747-1349327985844424705: Lebron James is better than Michael Jordan
+2025-03-12 03:27:47,461 [INFO] [Request: 1349328010595270747-1349327985844424705] Summarizing claim
+2025-03-12 03:27:49,829 [INFO] [Request: 1349328010595270747-1349327985844424705] Starting Snopes search for: Lebron better than Jordan
+2025-03-12 03:27:51,898 [INFO] [Request: 1349328010595270747-1349327985844424705] Completed Snopes search successfully
+2025-03-12 03:27:51,898 [INFO] [Request: 1349328010595270747-1349327985844424705] Starting Mistral fact-check API call
+2025-03-12 03:27:59,769 [INFO] [Request: 1349328010595270747-1349327985844424705] Received response from Mistral
+2025-03-12 03:27:59,984 [INFO] Completed fact check in 12.52 seconds for request 1349328010595270747-1349327985844424705
+2025-03-12 03:27:59,984 [INFO] Completed command: factcheck from beastlybagel with hash 31465a7f8379e4f97f0bd06fd54e38c3
+2025-03-12 03:31:16,857 [INFO] Starting command: factcheck from dolph3474 with hash 09682ddcc9a753aa4630924d9fe8d7cb
+2025-03-12 03:31:16,858 [INFO] Starting factcheck for request 1349328890472042526-1349328855370043476 (hash: 09682ddcc9a753aa4630924d9fe8d7cb)
+2025-03-12 03:31:17,502 [INFO] Processing fact check for request 1349328890472042526-1349328855370043476: Lebron James is better than Michael Jordan, even mj said so
+2025-03-12 03:31:17,502 [INFO] [Request: 1349328890472042526-1349328855370043476] Summarizing claim
+2025-03-12 03:31:18,359 [INFO] [Request: 1349328890472042526-1349328855370043476] Starting Snopes search for: Michael Jordan called Lebron James better
+2025-03-12 03:31:20,476 [INFO] [Request: 1349328890472042526-1349328855370043476] Completed Snopes search successfully
+2025-03-12 03:31:20,477 [INFO] [Request: 1349328890472042526-1349328855370043476] Starting Mistral fact-check API call
+2025-03-12 03:31:25,493 [INFO] [Request: 1349328890472042526-1349328855370043476] Received response from Mistral
+2025-03-12 03:31:25,643 [INFO] Completed fact check in 8.14 seconds for request 1349328890472042526-1349328855370043476
+2025-03-12 03:31:25,643 [INFO] Completed command: factcheck from dolph3474 with hash 09682ddcc9a753aa4630924d9fe8d7cb
+2025-03-12 03:32:24,697 [INFO] Starting command: factcheck from dolph3474 with hash a28ddca1e2c798578442eeb185835977
+2025-03-12 03:32:24,699 [INFO] Starting factcheck for request 1349329174753706075-1349329154436497418 (hash: a28ddca1e2c798578442eeb185835977)
+2025-03-12 03:32:25,208 [INFO] Processing fact check for request 1349329174753706075-1349329154436497418: michael jordan said lebron is better than him
+2025-03-12 03:32:25,208 [INFO] [Request: 1349329174753706075-1349329154436497418] Summarizing claim
+2025-03-12 03:32:25,898 [INFO] [Request: 1349329174753706075-1349329154436497418] Starting Snopes search for: Michael Jordan LeBron better
+2025-03-12 03:32:27,975 [INFO] [Request: 1349329174753706075-1349329154436497418] Completed Snopes search successfully
+2025-03-12 03:32:27,975 [INFO] [Request: 1349329174753706075-1349329154436497418] Starting Mistral fact-check API call
+2025-03-12 03:32:34,137 [INFO] [Request: 1349329174753706075-1349329154436497418] Received response from Mistral
+2025-03-12 03:32:34,384 [INFO] Completed fact check in 9.18 seconds for request 1349329174753706075-1349329154436497418
+2025-03-12 03:32:34,385 [INFO] Completed command: factcheck from dolph3474 with hash a28ddca1e2c798578442eeb185835977
+2025-03-12 03:34:53,385 [INFO] Starting command: factcheck from beastlybagel with hash af23ad41ddc66165a1f38c2908309821
+2025-03-12 03:34:53,386 [INFO] Starting factcheck for request 1349329798572544061-1349329669614338232 (hash: af23ad41ddc66165a1f38c2908309821)
+2025-03-12 03:34:53,884 [INFO] Processing fact check for request 1349329798572544061-1349329669614338232: michael jordan even said that lebron was better than him
+2025-03-12 03:34:53,884 [INFO] [Request: 1349329798572544061-1349329669614338232] Summarizing claim
+2025-03-12 03:34:54,548 [INFO] [Request: 1349329798572544061-1349329669614338232] Starting Snopes search for: Jordan called LeBron better
+2025-03-12 03:34:56,847 [INFO] [Request: 1349329798572544061-1349329669614338232] Completed Snopes search successfully
+2025-03-12 03:34:56,847 [INFO] [Request: 1349329798572544061-1349329669614338232] Starting Mistral fact-check API call
+2025-03-12 03:35:17,042 [INFO] [Request: 1349329798572544061-1349329669614338232] Received response from Mistral
+2025-03-12 03:35:17,282 [INFO] Completed fact check in 23.40 seconds for request 1349329798572544061-1349329669614338232
+2025-03-12 03:35:17,282 [INFO] Completed command: factcheck from beastlybagel with hash af23ad41ddc66165a1f38c2908309821
+2025-03-12 03:47:49,441 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 03:47:49,442 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 04:03:23,833 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 04:03:23,835 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 04:07:20,164 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 04:07:20,164 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 04:16:42,618 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 04:16:42,619 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 04:24:43,054 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 04:24:43,055 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 04:48:15,247 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 04:48:15,249 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 05:46:35,494 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 05:46:35,495 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 06:47:56,896 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 06:47:56,897 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 07:00:33,067 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 07:00:33,067 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 07:10:06,728 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 07:10:06,729 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 07:26:24,555 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 07:26:24,555 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 07:49:07,301 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 07:49:07,301 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 07:52:53,017 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 07:52:53,017 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 08:12:39,400 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 08:12:39,400 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 08:38:11,948 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 08:38:11,949 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 08:49:45,194 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 08:49:45,194 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 09:05:29,522 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 09:05:29,523 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 09:27:57,008 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 09:27:57,009 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 09:31:14,378 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 09:31:14,380 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 09:37:54,145 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 09:37:54,145 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 09:51:35,981 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 09:51:35,982 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 09:54:46,712 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 09:54:46,713 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 10:11:18,047 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 10:11:18,048 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 10:27:35,140 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 10:27:35,141 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 10:34:07,044 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 10:34:07,045 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 10:37:29,146 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 10:37:29,146 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 10:52:16,858 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 10:52:16,858 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 10:56:42,045 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 10:56:42,046 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:03:13,750 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:03:13,751 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:10:04,299 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:10:04,300 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:18:56,972 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:18:56,973 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:22:09,395 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:22:09,396 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:25:21,423 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:25:21,425 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:28:41,963 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:28:41,964 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:34:53,165 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:34:53,167 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:42:04,457 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:42:04,458 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:48:17,669 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:48:17,669 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 11:52:42,132 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 11:52:42,132 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 12:00:40,876 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 12:00:40,877 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 12:19:11,616 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 12:19:11,616 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 12:23:19,695 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 12:23:19,700 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 12:31:11,418 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 12:31:11,418 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 12:36:20,246 [INFO] Starting command: factcheck from beastlybagel with hash 55c1df61aa70ea91ba723fb4e3c6907f
+2025-03-12 12:36:20,249 [INFO] Starting factcheck for request 1349466058486054992-1349329356811665409 (hash: 55c1df61aa70ea91ba723fb4e3c6907f)
+2025-03-12 12:36:21,011 [INFO] Processing fact check for request 1349466058486054992-1349329356811665409: michael jordan is way better than lebron
+2025-03-12 12:36:21,011 [INFO] [Request: 1349466058486054992-1349329356811665409] Summarizing claim
+2025-03-12 12:36:26,436 [INFO] [Request: 1349466058486054992-1349329356811665409] Starting Snopes search for: Michael Jordan better than LeBron
+2025-03-12 12:36:26,503 [WARNING] Error searching Snopes: Message: invalid session id: session deleted as the browser has closed the connection
+from disconnected: not connected to DevTools
+  (Session info: chrome=134.0.6998.46)
+Stacktrace:
+0   chromedriver                        0x0000000105145804 cxxbridge1$str$ptr + 2785964
+1   chromedriver                        0x000000010513dddc cxxbridge1$str$ptr + 2754692
+2   chromedriver                        0x0000000104c91ea8 cxxbridge1$string$len + 92928
+3   chromedriver                        0x0000000104c7afa0 chromedriver + 192416
+4   chromedriver                        0x0000000104c9e820 cxxbridge1$string$len + 144504
+5   chromedriver                        0x0000000104d015d8 cxxbridge1$string$len + 549424
+6   chromedriver                        0x0000000104d1a178 cxxbridge1$string$len + 650704
+7   chromedriver                        0x0000000104ccd35c cxxbridge1$string$len + 335796
+8   chromedriver                        0x000000010510acd4 cxxbridge1$str$ptr + 2545532
+9   chromedriver                        0x000000010510dfa0 cxxbridge1$str$ptr + 2558536
+10  chromedriver                        0x00000001050ead04 cxxbridge1$str$ptr + 2414508
+11  chromedriver                        0x000000010510e800 cxxbridge1$str$ptr + 2560680
+12  chromedriver                        0x00000001050dbba0 cxxbridge1$str$ptr + 2352712
+13  chromedriver                        0x000000010512e45c cxxbridge1$str$ptr + 2690820
+14  chromedriver                        0x000000010512e5e4 cxxbridge1$str$ptr + 2691212
+15  chromedriver                        0x000000010513da50 cxxbridge1$str$ptr + 2753784
+16  libsystem_pthread.dylib             0x000000018d7332e4 _pthread_start + 136
+17  libsystem_pthread.dylib             0x000000018d72e0fc thread_start + 8
+
+2025-03-12 12:36:26,504 [INFO] [Request: 1349466058486054992-1349329356811665409] Completed Snopes search successfully
+2025-03-12 12:36:26,504 [INFO] [Request: 1349466058486054992-1349329356811665409] Starting Mistral fact-check API call
+2025-03-12 12:36:34,903 [INFO] [Request: 1349466058486054992-1349329356811665409] Received response from Mistral
+2025-03-12 12:36:35,169 [INFO] Completed fact check in 14.16 seconds for request 1349466058486054992-1349329356811665409
+2025-03-12 12:36:35,169 [INFO] Completed command: factcheck from beastlybagel with hash 55c1df61aa70ea91ba723fb4e3c6907f
+2025-03-12 13:53:45,099 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 13:53:45,100 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 14:01:35,687 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 14:01:35,688 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 14:07:07,038 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 14:07:07,039 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 14:12:38,567 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 14:12:38,567 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 14:16:42,406 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 14:16:42,406 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 14:23:40,383 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 14:23:40,383 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 14:27:41,306 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 14:27:41,306 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 14:57:04,217 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 14:57:04,218 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 15:00:32,931 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 15:00:32,933 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 15:14:11,743 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 15:14:11,745 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 15:16:47,400 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 15:16:47,400 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 15:21:00,876 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 15:21:00,877 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 15:31:15,279 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 15:31:15,281 [INFO] Using Discord.py version: 2.5.2
+2025-03-12 15:45:44,244 [INFO] Bot sherlock#8111 has connected to Discord!
+2025-03-12 15:45:44,246 [INFO] Using Discord.py version: 2.5.2

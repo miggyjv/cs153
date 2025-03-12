@@ -3,11 +3,29 @@ import discord
 import logging
 import time
 import sys
-from datetime import datetime, timedelta
+import asyncio
+import hashlib
+from functools import wraps
+import threading
 import random
 
 from discord.ext import commands
 from dotenv import load_dotenv
+
+# Create a single instance marker to prevent duplicate bot instances
+_instance_lock_file = "bot_instance.lock"
+try:
+    if os.path.exists(_instance_lock_file):
+        with open(_instance_lock_file, 'r') as f:
+            pid = f.read().strip()
+            if pid and os.path.exists(f"/proc/{pid}"):
+                print(f"Bot already running with PID {pid}. Exiting.")
+                sys.exit(0)
+    
+    with open(_instance_lock_file, 'w') as f:
+        f.write(str(os.getpid()))
+except:
+    pass  # Fail silently on Windows or other systems
 
 # Create a completely separate logger for our application
 APP_LOGGER = logging.getLogger('sherlock_app')
@@ -21,6 +39,11 @@ for handler in APP_LOGGER.handlers:
 handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
 APP_LOGGER.addHandler(handler)
+
+# Also log to a file for debugging
+file_handler = logging.FileHandler('bot_debug.log')
+file_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
+APP_LOGGER.addHandler(file_handler)
 
 # Configure Discord's own logging
 discord_logger = logging.getLogger('discord')
@@ -48,17 +71,55 @@ agent = FactCheckAgent(app_logger=APP_LOGGER)
 # Get the token from the environment variables
 token = os.getenv("DISCORD_TOKEN")
 
-# Global fact check lock and status tracking
-is_fact_checking = False
-current_fact_check_info = None  # Will store (channel_id, user_id, start_time)
+# Set to track processed command messages to avoid duplicates
+processed_commands = set()
+MAX_PROCESSED_COMMANDS = 1000  # Maximum number of command IDs to remember
 
-# Command tracking to prevent duplicate processing
-processed_commands = set()  # Stores command message IDs that have been processed
-MAX_PROCESSED_COMMANDS = 1000  # Limit to prevent memory issues
+# Tracking for commands that are currently being processed
+# Format: {command_hash: (start_time, message_id, channel_id)}
+active_commands = {}
+command_lock = asyncio.Lock()
 
 # Cache for recent fact check results
 factcheck_cache = {}  # Dictionary to store recent results: {message_id: (timestamp, embed)}
 CACHE_EXPIRY = 600  # Cache expiry time in seconds (10 minutes)
+
+# Generate a unique hash for a command to prevent duplicates
+def get_command_hash(ctx):
+    """Create a unique hash of command + message ID + channel + author"""
+    command_str = f"{ctx.command.name}:{ctx.message.id}:{ctx.channel.id}:{ctx.author.id}"
+    return hashlib.md5(command_str.encode()).hexdigest()
+
+# Decorator to prevent duplicate command execution
+def prevent_duplicate(func):
+    @wraps(func)
+    async def wrapper(ctx, *args, **kwargs):
+        command_hash = get_command_hash(ctx)
+        
+        async with command_lock:
+            # Check if command is already being processed
+            if command_hash in active_commands:
+                start_time, msg_id, _ = active_commands[command_hash]
+                elapsed = time.time() - start_time
+                APP_LOGGER.warning(f"Duplicate command detected: {ctx.command.name} from {ctx.author} - already running for {elapsed:.1f}s")
+                await ctx.send(f"⚠️ This command is already being processed (running for {elapsed:.1f} seconds). Please wait.")
+                return
+            
+            # Mark command as being processed
+            active_commands[command_hash] = (time.time(), ctx.message.id, ctx.channel.id)
+            APP_LOGGER.info(f"Starting command: {ctx.command.name} from {ctx.author} with hash {command_hash}")
+        
+        try:
+            # Execute the command
+            return await func(ctx, *args, **kwargs)
+        finally:
+            # Always clean up, even if command fails
+            async with command_lock:
+                if command_hash in active_commands:
+                    del active_commands[command_hash]
+                    APP_LOGGER.info(f"Completed command: {ctx.command.name} from {ctx.author} with hash {command_hash}")
+    
+    return wrapper
 
 @bot.event
 async def on_ready():
@@ -69,6 +130,7 @@ async def on_ready():
     https://discordpy.readthedocs.io/en/latest/api.html#discord.on_ready
     """
     APP_LOGGER.info(f"Bot {bot.user} has connected to Discord!")
+    APP_LOGGER.info(f"Using Discord.py version: {discord.__version__}")
 
 @bot.event
 async def on_message(message: discord.Message):
@@ -98,6 +160,7 @@ async def on_message(message: discord.Message):
 # Run !ping with any number of arguments to see the command in action.
 # Feel free to delete this if your project will not need commands.
 @bot.command(name="ping", help="Pings the bot.")
+@prevent_duplicate
 async def ping(ctx, *, arg=None):
     if arg is None:
         await ctx.send("Pong!")
@@ -106,31 +169,32 @@ async def ping(ctx, *, arg=None):
 
 # Add a command to get current fact-check status
 @bot.command(name="status", help="Check if the bot is currently performing a fact check")
+@prevent_duplicate
 async def status_command(ctx):
-    global is_fact_checking, current_fact_check_info
-    
-    if not is_fact_checking:
-        await ctx.send("No fact checks are currently running. The bot is ready for new requests.")
+    """Check the status of active commands."""
+    if not active_commands:
+        await ctx.send("No commands are currently being processed.")
         return
     
-    # If a fact check is running, show details
-    channel_id, user_id, start_time = current_fact_check_info
-    elapsed_time = time.time() - start_time
+    status_text = []
+    current_time = time.time()
     
-    try:
-        channel = bot.get_channel(channel_id)
-        user = await bot.fetch_user(user_id)
-        
-        await ctx.send(f"⏳ A fact check requested by {user.name} in {channel.name} has been running for {elapsed_time:.1f} seconds.")
-    except:
-        await ctx.send(f"⏳ A fact check has been running for {elapsed_time:.1f} seconds.")
+    for cmd_hash, (start_time, msg_id, chan_id) in active_commands.items():
+        elapsed = current_time - start_time
+        try:
+            channel = bot.get_channel(chan_id)
+            channel_name = channel.name if channel else "Unknown channel"
+            status_text.append(f"• Command hash {cmd_hash[:8]} running for {elapsed:.1f}s in {channel_name}")
+        except:
+            status_text.append(f"• Command hash {cmd_hash[:8]} running for {elapsed:.1f}s")
+    
+    await ctx.send("**Active Commands:**\n" + "\n".join(status_text))
 
 # Add a slash command for fact-checking
 @bot.command(name="factcheck", help="Fact check a claim by replying to it with this command")
+@prevent_duplicate
 async def factcheck_command(ctx):
-    """Command to fact check a message that was replied to."""
-    global is_fact_checking, current_fact_check_info
-    
+    """Fact check a claim by replying to a message."""
     # Check if this is a reply
     if ctx.message.reference is None:
         await ctx.send("Please reply to a message containing a claim to fact check.")
@@ -139,37 +203,11 @@ async def factcheck_command(ctx):
     # Get the referenced message ID
     ref_msg_id = ctx.message.reference.message_id
     
-    # Create a unique identifier for this specific factcheck request
-    # This combines the command message ID and the referenced message ID
+    # Generate a unique request ID for tracking
     request_id = f"{ctx.message.id}-{ref_msg_id}"
+    command_hash = get_command_hash(ctx)
     
-    # Check for an active factcheck with the same request ID
-    active_requests = await ctx.channel.history(limit=10).flatten()
-    for msg in active_requests:
-        # Skip messages not from the bot
-        if msg.author != bot.user:
-            continue
-            
-        # Check if this is a "processing" message for the same request
-        if msg.content.startswith("🔍 Analyzing claim...") and hasattr(msg, 'reference'):
-            # If the message has our reference ID format at the end
-            if msg.content.endswith(f"[Request: {request_id}]"):
-                await ctx.send("⚠️ This claim is already being fact-checked. Please wait for results.")
-                return
-    
-    # Check if there's already a fact check in progress (globally)
-    if is_fact_checking:
-        channel_id, user_id, start_time = current_fact_check_info
-        elapsed_time = time.time() - start_time
-        
-        try:
-            channel = bot.get_channel(channel_id)
-            user = await bot.fetch_user(user_id)
-            await ctx.send(f"⏳ Another fact check requested by {user.name} in {channel.name} is currently in progress "
-                          f"({elapsed_time:.1f} seconds elapsed). Please try again later.")
-        except:
-            await ctx.send(f"⏳ Another fact check is currently in progress. Please try again later.")
-        return
+    APP_LOGGER.info(f"Starting factcheck for request {request_id} (hash: {command_hash})")
     
     # Check if we have a recent result for this message
     current_time = time.time()
@@ -178,30 +216,27 @@ async def factcheck_command(ctx):
         # If the cached result is recent enough, use it
         if current_time - timestamp < CACHE_EXPIRY:
             await ctx.send("📋 Using recent fact-check result:", embed=embed)
+            APP_LOGGER.info(f"Used cached result for request {request_id}")
             return
         # Otherwise, remove the expired cache entry
         else:
             del factcheck_cache[ref_msg_id]
-    
-    # Set the global fact-checking lock
-    is_fact_checking = True
-    current_fact_check_info = (ctx.channel.id, ctx.author.id, current_time)
     
     try:
         # Get the message being replied to
         referenced_msg = await ctx.channel.fetch_message(ref_msg_id)
         claim = referenced_msg.content
         
-        # Let the user know we're working on it - with unique request ID
+        # Send a message indicating work is in progress
         response_msg = await ctx.send(f"🔍 Analyzing claim... This might take a moment. [Request: {request_id}]")
         
         # Process the fact check
         start = time.time()
-        APP_LOGGER.info(f"Fact checking claim from {referenced_msg.author}: \"{claim}\" [Request: {request_id}]")
+        APP_LOGGER.info(f"Processing fact check for request {request_id}: {claim}")
         
-        embed = await agent.fact_check(claim)
+        embed = await agent.fact_check(claim, request_id)
         
-        # Edit our response with the result embed - keep the request ID in a hidden field
+        # Additional request ID for tracking
         embed.add_field(name="\u200b", value=f"Request ID: {request_id}", inline=False)
         
         # Edit our response with the result embed
@@ -212,23 +247,14 @@ async def factcheck_command(ctx):
         
         end = time.time()
         time_delay = end - start
-        APP_LOGGER.info(f"Completed fact check in {time_delay:.2f} seconds [Request: {request_id}]")
+        APP_LOGGER.info(f"Completed fact check in {time_delay:.2f} seconds for request {request_id}")
         
     except Exception as e:
-        APP_LOGGER.error(f"Error in fact check: {e}")
+        APP_LOGGER.error(f"Error in fact check for request {request_id}: {e}", exc_info=True)
         if 'response_msg' in locals():
             await response_msg.edit(content=f"Error during fact check: {str(e)} [Request: {request_id}]")
         else:
             await ctx.send(f"Error during fact check: {str(e)}")
-    
-    finally:
-        # Always release the lock when done
-        is_fact_checking = False
-        current_fact_check_info = None
-        
-        # Clean up expired cache entries occasionally
-        if random.random() < 0.1:  # ~10% chance to clean up on each fact check
-            clean_expired_cache()
 
 def clean_expired_cache():
     """Remove expired entries from the factcheck cache."""
@@ -242,11 +268,27 @@ def clean_expired_cache():
     if expired_keys:
         APP_LOGGER.info(f"Cleaned {len(expired_keys)} expired cache entries")
 
+# Handle bot shutdown
+def cleanup():
+    """Clean up when the bot shuts down."""
+    try:
+        if os.path.exists(_instance_lock_file):
+            os.remove(_instance_lock_file)
+    except:
+        pass
+
 # Only run if this file is executed directly
 if __name__ == "__main__":
     try:
         # Start the bot, connecting it to the gateway
         APP_LOGGER.info("Starting bot...")
+        
+        # Register cleanup on exit
+        import atexit
+        atexit.register(cleanup)
+        
+        # Run the bot
         bot.run(token)
     except Exception as e:
-        APP_LOGGER.error(f"Failed to start bot: {e}")
+        APP_LOGGER.error(f"Failed to start bot: {e}", exc_info=True)
+        cleanup()

@@ -13,6 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 import logging
+import asyncio
+import concurrent.futures
 
 # No longer get discord's logger
 # logger = logging.getLogger('discord')
@@ -46,6 +48,9 @@ FORMAT YOUR RESPONSE EXACTLY AS FOLLOWS:
 
 Be concise and focused. Do not repeat the rating multiple times or create redundant sections."""
 
+# Add a thread pool executor for running WebDriver operations
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+
 class FactCheckAgent:
     def __init__(self, app_logger=None):
         """Initialize the FactCheckAgent with both Mistral and Chrome WebDriver."""
@@ -67,16 +72,32 @@ class FactCheckAgent:
         service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(options=chrome_options)
         
-    async def fact_check(self, claim):
+    async def fact_check(self, claim, request_id=None):
         """Analyze a claim and determine its factual accuracy."""
         
+        log_prefix = f"[Request: {request_id}] " if request_id else ""
+        
         # First, get a concise summary for searching
+        self.logger.info(f"{log_prefix}Summarizing claim")
         summary = await self.summarize_claim(claim)
         cleaned_summary = self.clean_for_search(summary)
         
-        # Search Snopes using the cleaned summary
-        snopes_results = self.search_relevant_info(cleaned_summary)
+        # Run the Snopes search in a separate thread to avoid blocking the event loop
+        self.logger.info(f"{log_prefix}Starting Snopes search for: {cleaned_summary}")
+        loop = asyncio.get_event_loop()
+        try:
+            snopes_results = await loop.run_in_executor(
+                executor, 
+                self.search_relevant_info,
+                cleaned_summary
+            )
+            self.logger.info(f"{log_prefix}Completed Snopes search successfully")
+        except Exception as e:
+            self.logger.error(f"{log_prefix}Error during Snopes search: {e}", exc_info=True)
+            snopes_results = "No relevant Snopes fact-checks found. Using model's built-in knowledge."
         
+        # Continue with fact check using Mistral
+        self.logger.info(f"{log_prefix}Starting Mistral fact-check API call")
         messages = [
             {"role": "system", "content": FACT_CHECK_SYSTEM_PROMPT},
             {"role": "user", "content": f"""Please fact check this claim: '{claim}'
@@ -94,6 +115,7 @@ Please consider this information in your fact-check analysis."""}
         
         # Get the raw result
         raw_result = response.choices[0].message.content
+        self.logger.info(f"{log_prefix}Received response from Mistral")
         
         # Create an embed for Discord
         embed = self.create_fact_check_embed(raw_result, claim)
